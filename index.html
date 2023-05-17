@@ -2,8 +2,42 @@
 <html>
 
 <body>
+
+    <p>Score: <span id="score">0</span></p>
+    <p>High Score: <span id="highscore">0</span></p>
+
+    <button onclick="retry()">Retry</button>
+
+
     <canvas id="can"></canvas>
     <script>
+
+        window.onload = function () {
+            // ハイスコアの読み込み
+            const savedHighScore = localStorage.getItem("highScore");
+            if (savedHighScore) {
+                highScore = JSON.parse(savedHighScore);
+            }
+            // ハイスコアを表示する
+            const highScoreElement = document.getElementById("highscore");
+            highScoreElement.textContent = highScore.toString();
+            console.log
+        };
+
+
+        //リトライ
+        function retry() {
+            init(); // ゲームの初期化
+            over = false; // ゲームオーバーフラグをリセット
+            drawAll(); // ゲーム画面の描画
+        }
+
+
+        //スコア
+        let score = 0;
+        let highScore = 0;
+        let linec = 0;
+
 
         //落ちるスピード
         const GAME_SPEED = 300;
@@ -128,6 +162,25 @@
                     field[y][x] = 0;
                 }
             }
+            // スコアの初期化と表示の更新
+            score = 0;
+            updateScore();
+
+            tetro_t = Math.floor(Math.random() * (TETRO_TYPES.length - 1)) + 1;
+            tetro = TETRO_TYPES[tetro_t];
+            tetro_x = START_X;
+            tetro_y = START_Y;
+
+
+            // ハイスコアを表示する
+            const highScoreElement = document.getElementById("highscore");
+            highScoreElement.textContent = highScore.toString();
+
+            // ハイスコアの読み込み
+            const savedHighScore = localStorage.getItem("highScore");
+            if (savedHighScore) {
+                highScore = parseInt(savedHighScore);
+            }
 
         }
 
@@ -223,6 +276,31 @@
         }
 
 
+        function updateScore() {
+            const scoreElement = document.getElementById("score");
+            scoreElement.textContent = score.toString();
+
+            // ハイスコアを更新する
+            if (score > highScore) {
+                highScore = score;
+            }
+            // ハイスコアを表示する
+            const highScoreElement = document.getElementById("highscore");
+            highScoreElement.textContent = highScore.toString();
+        }
+
+        function updateHighScore() {
+            if (score > highScore) {
+                highScore = score;
+                const highScoreElement = document.getElementById("highscore");
+                highScoreElement.textContent = highScore.toString();
+            }
+            // ハイスコアを保存
+            localStorage.setItem("highScore", JSON.stringify(highScore));
+
+        }
+
+
         //テトロ固定
         function fixTetro() {
             for (let y = 0; y < TETRO_SIZE; y++) {
@@ -232,6 +310,13 @@
                     }
                 }
             }
+
+
+
+            // スコアの増加
+            score += linec * 100;
+            updateScore();
+            updateHighScore(); // ハイスコアの更新
 
 
         }
@@ -255,6 +340,11 @@
                         }
                     }
                 }
+            }
+            // 行が消去された後の処理
+            if (linec > 0) {
+                score += linec * 100;  // 行数に応じてスコアを増加
+                updateScore();
             }
         }
 
