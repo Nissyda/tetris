@@ -1,7 +1,34 @@
 <!DOCTYPE html>
 <html>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js"></script>
+
 
 <body>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+            serverTimestamp,
+            query,
+            orderBy,
+            onSnapshot,
+        } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAF6HL7MvUBdL6amuQR9xZkbCIF8KDNCh4",
+            authDomain: "trtris1111.firebaseapp.com",
+            projectId: "trtris1111",
+            storageBucket: "trtris1111.appspot.com",
+            messagingSenderId: "205776085785",
+            appId: "1:205776085785:web:4e0809d89ef5cff6739b88"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+    </script>
 
     <p>Score: <span id="score">0</span></p>
     <p>High Score: <span id="highscore">0</span></p>
@@ -12,17 +39,68 @@
     <canvas id="can"></canvas>
     <script>
 
-        window.onload = function () {
+        //window.onload = function () {
             // ハイスコアの読み込み
-            const savedHighScore = localStorage.getItem("highScore");
-            if (savedHighScore) {
-                highScore = JSON.parse(savedHighScore);
-            }
+          //  const savedHighScore = localStorage.getItem("highScore");
+           // if (savedHighScore) {
+           //     highScore = JSON.parse(savedHighScore);
+          //  }
+
             // ハイスコアを表示する
-            const highScoreElement = document.getElementById("highscore");
-            highScoreElement.textContent = highScore.toString();
-            console.log
-        };
+         //   const highScoreElement = document.getElementById("highscore");
+         //   highScoreElement.textContent = highScore.toString();
+         //   console.log
+    //    };
+
+
+
+            // Firebase SDKの初期化
+            firebase.initializeApp(firebaseConfig);
+
+            // Firestoreの参照を取得
+            //const db = firebase.firestore();
+
+            // ハイスコアをFirestoreに保存する関数
+            function updateHighScore() {
+                if (score > highScore) {
+                    highScore = score;
+                    const highScoreElement = document.getElementById("highscore");
+                    highScoreElement.textContent = highScore.toString();
+
+                    // Firestoreにハイスコアを保存するJSon
+                    db.collection("scores").doc("highScore").set({
+                        value: highScore
+                    })
+                        .then(() => {
+                            console.log;
+                        })
+                        .catch((error) => {
+                            console.error( error);
+                        });
+                }
+            }
+
+            // ハイスコアをFirestoreから読み込む
+            function loadHighScore() {
+                db.collection("scores").doc("highScore").get()
+                    .then((doc) => {
+                        if (doc.exists) {
+                            highScore = doc.data().value;
+                            const highScoreElement = document.getElementById("highscore");
+                            highScoreElement.textContent = highScore.toString();
+                            console.log;
+                        } else {
+                            console.log;
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                    });
+            }
+
+        // ページの読み込み時にハイスコアをFirestoreから読み込む
+        loadHighScore();
+
 
 
         //リトライ
@@ -177,12 +255,12 @@
             highScoreElement.textContent = highScore.toString();
 
             // ハイスコアの読み込み
-            const savedHighScore = localStorage.getItem("highScore");
-            if (savedHighScore) {
-                highScore = parseInt(savedHighScore);
-            }
+          //  const savedHighScore = localStorage.getItem("highScore");
+           // if (savedHighScore) {
+           //     highScore = parseInt(savedHighScore);
+          //  }
 
-        }
+      }
 
 
         //ブロック一つ描画
@@ -294,11 +372,13 @@
                 highScore = score;
                 const highScoreElement = document.getElementById("highscore");
                 highScoreElement.textContent = highScore.toString();
-            }
-            // ハイスコアを保存
-            localStorage.setItem("highScore", JSON.stringify(highScore));
 
+
+                const database = firebase.database();
+                database.ref("highScore").set(highScore);
+            }
         }
+
 
 
         //テトロ固定
